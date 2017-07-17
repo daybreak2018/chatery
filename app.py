@@ -11,9 +11,17 @@ from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
 from ws4py.websocket import WebSocket
 from ws4py.messaging import TextMessage
 
+import constants
+
+from dbutils.models import MessageTable
+from dbutils.managers import SQLiteDBManager
+
 USERS = ['mike', 'stella', 'john']
 
 DB_STRING = 'data.db'
+
+DB_TABLE = MessageTable(constants.DB_NAME,constants.DB_PATH)
+DB_MGR = SQLiteDBManager(DB_TABLE)
 
 class ChatPlugin(WebSocketPlugin):
     def __init__(self, bus):
@@ -51,17 +59,13 @@ class ChatWebSocketHandler(WebSocket):
             # echo to all
             cherrypy.engine.publish('websocket-broadcast', m)
             timestamp = int(time.time())
-            with sqlite3.connect(DB_STRING) as dbc:
-                dbc.execute("INSERT INTO messages (username, message, created) VALUES (?, ?, ?)",
-                            [self.username, text, timestamp])
+
+            result = DB_MGR.run_query(DB_TABLE.get_insert_query(),[self.username, text, timestamp])
         else:
             # or echo to a single user
             left, message = text.rsplit(':', 1)
-            print(left)
             from_username, to_username = left.split('@')
-            print(repr(from_username), repr(to_username), repr(self.username))
             client = cherrypy.engine.publish('get-client', to_username.strip()).pop()
-            print(client)
             client.send("@@%s: %s" % (from_username.strip()[:-1], message.strip()))
 
     def closed(self, code, reason="A client left the room without a proper explanation."):
@@ -78,115 +82,23 @@ class Root(object):
 
     @cherrypy.expose
     def index(self):
-        return """<html>
-    <head>
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-      <style>
-      #username {
-        width: 100%;
-        font-size: 1.2em;
-        line-height: 3em;
-      }
-      </style>
-    </head>
-    <body>
-    <h1>PyconMY 2016 Engage</h1>
-    <form action='/chatroom' id='chatform' method='get'>
-      <input type='text' name='username' id='username' class='form-control'/><br />
-      <input id='send' type='submit' value='Set Nickname' class='form-control btn btn-primary'/>
-      </form>
-    </body>
-    </html>
-    """
+        with open(constants.TEMPLATE_PATH+constants.INDEX_NAME,'r') as chat_template:
+            template = chat_template.read()
+        return template
 
     @cherrypy.expose
     def chatroom(self, username=None):
         username = username or "User%d" % random.randint(0, 100)
         messages = []
-        with sqlite3.connect(DB_STRING) as dbc:
-            result = dbc.execute("SELECT * FROM messages LIMIT 1000")
-            for row in result:
-                messages.append(row[1])
 
-        return """<html>
-    <head>
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-      <style>
-      textarea {
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        box-sizing: border-box;
-        font-size: 1.2em;
-        width: 100%%;
-        max-height: 500em;
-        overflow: auto;
-      }
-      #message {
-        width: 100%%;
-        font-size: 1.2em;
-        line-height: 3em;
-      }
-      </style>
-      <script   src="https://code.jquery.com/jquery-1.12.4.min.js"   integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="   crossorigin="anonymous"></script>
-      <script type='application/javascript'>
-        $(document).ready(function() {
+        result = DB_MGR.run_query(DB_TABLE.get_limited_get_query(),[])
+        for row in result:
+            messages.append(row[1])
 
-          websocket = '%(scheme)s://%(host)s:%(port)s/ws?username=%(username)s';
-          if (window.WebSocket) {
-            ws = new WebSocket(websocket, ['mytest']);
-          }
-          else if (window.MozWebSocket) {
-            ws = MozWebSocket(websocket);
-          }
-          else {
-            console.log('WebSocket Not Supported');
-            return;
-          }
+        with open(constants.TEMPLATE_PATH+constants.CHATBOX_NAME,'r') as chat_template:
+            template = chat_template.read()
 
-          window.onbeforeunload = function(e) {
-            $('#chat').val($('#chat').val() + 'Bye bye...\\n');
-            ws.close(1000, '%(username)s left the room');
-
-            if(!e) e = window.event;
-            e.stopPropagation();
-            e.preventDefault();
-          };
-          ws.onmessage = function (evt) {
-             $('#chat').val($('#chat').val() + evt.data + '\\n');
-             var textarea = document.getElementById('chat');
-             textarea.scrollTop = textarea.scrollHeight;
-          };
-          ws.onopen = function() {
-             ws.send("%(username)s entered the room");
-          };
-          ws.onclose = function(evt) {
-             $('#chat').val($('#chat').val() + 'Connection closed by server: ' + evt.code + ' \"' + evt.reason + '\". Refresh to reconnect.\\n');
-          };
-
-          $('#send').click(function() {
-             console.log($('#message').val());
-             ws.send('%(username)s: ' + $('#message').val());
-             $('#message').val("");
-             return false;
-          });
-          var textarea = document.getElementById('chat');
-          textarea.scrollTop = textarea.scrollHeight;
-        });
-      </script>
-    </head>
-    <body>
-    <h1>PyconMY 2016 Engage</h1>
-    <form action='#' id='chatform' method='get'>
-      <textarea id='chat' cols='35' rows='10'>%(messages)s</textarea>
-      <br />
-      <input type='text' id='message' placeholder='Type your message here. Be nice.' />
-      <input id='send' type='submit' value='Send' class='form-control btn btn-primary'/>
-      </form>
-    </body>
-    </html>
-    """ % {'username': username, 'host': self.host,
+        return template % {'username': username, 'host': self.host,
            'port': self.ssl_port if self.ssl else self.port, 'scheme': self.scheme,
            'messages': "\n".join(messages) + "\n"}
 
@@ -214,7 +126,7 @@ if __name__ == '__main__':
     cherrypy.config.update({
         'server.socket_host': args.host,
         'server.socket_port': args.port,
-        'tools.staticdir.root': os.path.abspath(os.path.join(os.path.dirname(__file__), 'static')),
+        'tools.staticdir.root': os.path.abspath(os.path.join(os.path.dirname(__file__), 'assets')),
     })
     config = {
         '/ws': {
@@ -222,9 +134,9 @@ if __name__ == '__main__':
             'tools.websocket.handler_cls': ChatWebSocketHandler,
             'tools.websocket.protocols': ['toto', 'mytest', 'hithere']
         },
-        '/static': {
+        '/js': {
               'tools.staticdir.on': True,
-              'tools.staticdir.dir': ''
+              'tools.staticdir.dir': 'js'
         },
     }
 
