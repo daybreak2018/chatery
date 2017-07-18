@@ -2,19 +2,56 @@
     <head>
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-      <style>
-      #username {
-        width: 100%;
-        font-size: 1.2em;
-        line-height: 3em;
-      }
-      </style>
+        <link rel="stylesheet" href="./styles/style.css">
+
+        <script   src="https://code.jquery.com/jquery-1.12.4.min.js"   integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="   crossorigin="anonymous"></script>
+
+
+<script>
+        $(document).ready(function() {
+            function readFile() {
+                if (this.files && this.files[0]) {
+                    var FR = new FileReader();
+
+                    FR.addEventListener("load", function (e) {
+                        console.log(e.target.result);
+                        $('#display_picture').val(e.target.result);
+                    });
+
+                    FR.readAsDataURL(this.files[0]);
+                }
+            }
+
+            document.getElementById("dp").addEventListener("change", readFile);
+        });
+    </script>
+
+
     </head>
     <body>
-    <h1>PyconMY 2017 APAC</h1>
-    <form action='/chatroom' id='chatform' method='get'>
+    <div class="col-md-12 chat-container">
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                PyConMy APAC 2017
+            </div>
+            <div class="panel-body chat-background" id="msgListContainer">
+<label for="dp">Display Picture</label>
+                                                    <input type='file' name='dp' id='dp' class='form-control'/><br />
+
+    <form action='/chatroom' id='chatform' method='post'>
+    <label for="username">Nickname</label>
       <input type='text' name='username' id='username' class='form-control'/><br />
-      <input id='send' type='submit' value='Set Nickname' class='form-control btn btn-primary'/>
+        <input type='hidden' name='display_picture' id='display_picture' value=""/><br />
+<input id='send' type='submit' value='Set Details' class='btn btn-info'/>
       </form>
+            </div>
+            <div class="panel-footer">
+                <div class="input-group">
+
+
+                                </div>
+            </div>
+        </div>
+    </div>
     </body>
-</html>
+    </html>

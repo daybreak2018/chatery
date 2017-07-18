@@ -2,80 +2,66 @@
     <head>
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-      <style>
-      textarea {
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        box-sizing: border-box;
-        font-size: 1.2em;
-        width: 100%%;
-        max-height: 500em;
-        overflow: auto;
-      }
-      #message {
-        width: 100%%;
-        font-size: 1.2em;
-        line-height: 3em;
-      }
-      </style>
+        <link rel="stylesheet" href="./styles/style.css">
 
+        <script   src="https://cdnjs.cloudflare.com/ajax/libs/rivets/0.7.1/rivets.bundled.min.js"></script>
         <script   src="https://code.jquery.com/jquery-1.12.4.min.js"   integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="   crossorigin="anonymous"></script>
+        <script   src="./js/chatbox.js"></script>
 
-      <script type='application/javascript'>
-          websocket = '%(scheme)s://%(host)s:%(port)s/ws?username=%(username)s';
 
-$(document).ready(function() {
-          if (window.WebSocket) {
-            ws = new WebSocket(websocket, ['mytest']);
-          }
-          else if (window.MozWebSocket) {
-            ws = MozWebSocket(websocket);
-          }
-          else {
-            console.log('WebSocket Not Supported');
-            return;
-          }
+        <script type='application/javascript'>
+          var username = "%(username)s";
+            var websocket = '%(scheme)s://%(host)s:%(port)s/ws?username='+username;
+          var display_picture = "%(display_picture)s"
+            var messageJson = {"messages": %(messages)s,"username":username};
 
-          window.onbeforeunload = function(e) {
-            $('#chat').val($('#chat').val() + 'Bye bye...\\n');
-            ws.close(1000, '%(username)s left the room');
 
-            if(!e) e = window.event;
-            e.stopPropagation();
-            e.preventDefault();
-          };
-          ws.onmessage = function (evt) {
-             $('#chat').val($('#chat').val() + evt.data + '\n');
-             var textarea = document.getElementById('chat');
-             textarea.scrollTop = textarea.scrollHeight;
-          };
-          ws.onopen = function() {
-             ws.send("%(username)s entered the room");
-          };
-          ws.onclose = function(evt) {
-             $('#chat').val($('#chat').val() + 'Connection closed by server: ' + evt.code + ' \"' + evt.reason + '\". Refresh to reconnect.\\n');
-          };
 
-          $('#send').click(function() {
-             console.log($('#message').val());
-             ws.send('%(username)s: ' + $('#message').val());
-             $('#message').val("");
-             return false;
-          });
-          var textarea = document.getElementById('chat');
-          textarea.scrollTop = textarea.scrollHeight;
-        });
       </script>
 
 
     </head>
     <body>
-    <h1>PyconMY 2016 Engage</h1>
-    <form action='#' id='chatform' method='get'>
-      <textarea id='chat' cols='35' rows='10'>%(messages)s</textarea>
-      <br />
-      <input type='text' id='message' placeholder='Type your message here. Go knix.' />
-      <input id='send' type='submit' value='Send' class='form-control btn btn-primary'/>
-      </form>
+    <div class="col-md-12 chat-container">
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                PyConMy APAC 2017
+            </div>
+            <div class="panel-body chat-background" id="msgListContainer">
+                <ul class="media-list" id="msgList">
+
+                                    <li class="media" rv-each-msg="messages">
+
+                                        <div class="media-body">
+
+                                            <div class="media">
+                                                <a class="pull-left" href="#" rv-if="msg.username | neq username" rv-click="msg.username">
+                                                    <img class="media-object img-circle dp" rv-src="msg.display_picture"/>
+                                                </a>
+                                                <a class="pull-right" href="#" rv-if="msg.username | eq username">
+                                                        <img class="media-object img-circle dp" rv-src="msg.display_picture" />
+                                                </a>
+                                                <!--<span class="arrow" rv-if="msg.username | neq username"></span>-->
+                                                <div class="media-body chatbubble"  rv-class-current_user="msg.username | eq username">
+                                                    {msg.message}
+                                                    <br />
+                                                   <small rv-class-text-muted="msg.username | neq username" >{msg.username} | {msg.time}</small>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </li>
+                    </ul>
+            </div>
+            <div class="panel-footer">
+                <div class="input-group">
+                                    <input id="message" type="text" class="form-control" placeholder="Enter Message" />
+                                    <span class="input-group-btn">
+                                        <button id="send" class="btn btn-info" type="button">Send</button>
+                                    </span>
+                                </div>
+            </div>
+        </div>
+    </div>
     </body>
     </html>

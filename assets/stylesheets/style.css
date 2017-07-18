@@ -1,38 +1,62 @@
-body {
-  padding: 0px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-  height:100%;
-  width:100%;
+.dp{
+    height: 50px;
+    width: 50px;
 }
 
-a {
-  color: #00B7FF;
+.btn-info{
+    background-color: #ed7663;
+    border: none;
 }
 
-#NavBar{
-	padding: 0px 0px;
-	width: 100%;
-	
+.panel-footer{
+    background-color: #69a8C3;
+    border:none;
+    height: 9%;
 }
 
-#content{
-	padding: 50px;
+.panel-heading{
+    height: 9%;
 }
 
-#footer{
-	position: absolute;
-	display:block;
-    width: 100%;
-    bottom: 0px;
-    
+.chat-container{
+    height:100%;
+    padding: 0;
+    margin: 0;
 }
 
-.link {
-	font-weight:bolder;
-	text-decoration: underline;
+.chat-background {
+  background: #1fc8db; /* For browsers that do not support gradients */
+  background: -webkit-linear-gradient(180deg, #dfeec7 10%, #b9decc 51%, #74b4cd 75%); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(187deg, #c4d29d, #ddecc5 30%, #75b7cf); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(187deg, #c4d29d, #ddecc5 30%, #75b7cf); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(187deg, #c4d29d, #ddecc5 30%, #75b7cf);
+    height:82%;
+    overflow: auto;
+
+    font-family: Calibri;
+    font-weight: 500;
 }
 
-.best{
-	border-right-color:#33cc33!important;
-	border-right-width:2px!important;
+.chatbubble{
+      background: #ffffff;
+  -webkit-border-radius: 15px;
+  -moz-border-radius: 15px;
+  border-radius: 15px;
+    padding: 5px;
+}
+
+.current_user{
+    background: #ed7663;
+    color: #ffffff;
+}
+
+.arrow {
+    border:solid 6px transparent;
+    border-right-color:#fff;
+    position:absolute;
+    margin:15px 0 0 -12px;
+}
+
+hr{
+    margin-top: 30px;
 }

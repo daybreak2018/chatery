@@ -12,16 +12,16 @@ from ws4py.websocket import WebSocket
 from ws4py.messaging import TextMessage
 
 import constants
+import json
+import  datetime
 
 from dbutils.models import MessageTable
 from dbutils.managers import SQLiteDBManager
 
-USERS = ['mike', 'stella', 'john']
-
-DB_STRING = 'data.db'
-
 DB_TABLE = MessageTable(constants.DB_NAME,constants.DB_PATH)
 DB_MGR = SQLiteDBManager(DB_TABLE)
+
+DP_MAP = {}
 
 class ChatPlugin(WebSocketPlugin):
     def __init__(self, bus):
@@ -55,10 +55,18 @@ class ChatWebSocketHandler(WebSocket):
 
     def received_message(self, m):
         text = m.data.decode('utf8')
+
+        timestamp = int(time.time())
+
+        dp = DP_MAP.get(self.username)
+        if not dp:
+            dp = constants.DEFAULT_DP_PATH
+
+        published_msg = {"username":self.username,"message":text,"time":datetime.datetime.fromtimestamp(
+           int(timestamp)).strftime(constants.DATE_FORMAT),"display_picture":dp}
         if text.find("@") == -1:
             # echo to all
-            cherrypy.engine.publish('websocket-broadcast', m)
-            timestamp = int(time.time())
+            cherrypy.engine.publish('websocket-broadcast', json.dumps(published_msg))
 
             result = DB_MGR.run_query(DB_TABLE.get_insert_query(),[self.username, text, timestamp])
         else:
@@ -66,7 +74,8 @@ class ChatWebSocketHandler(WebSocket):
             left, message = text.rsplit(':', 1)
             from_username, to_username = left.split('@')
             client = cherrypy.engine.publish('get-client', to_username.strip()).pop()
-            client.send("@@%s: %s" % (from_username.strip()[:-1], message.strip()))
+            published_msg["message"] = to_username+"::"+message
+            client.send(json.dumps(published_msg))
 
     def closed(self, code, reason="A client left the room without a proper explanation."):
         cherrypy.engine.publish('del-client', self.username)
@@ -87,20 +96,26 @@ class Root(object):
         return template
 
     @cherrypy.expose
-    def chatroom(self, username=None):
+    def chatroom(self, username=None,display_picture=None):
         username = username or "User%d" % random.randint(0, 100)
+        display_picture = display_picture or constants.DEFAULT_DP_PATH
         messages = []
+
+        DP_MAP[username] = display_picture
 
         result = DB_MGR.run_query(DB_TABLE.get_limited_get_query(),[])
         for row in result:
-            messages.append(row[1])
+            dp = DP_MAP.get(row[0])
+            if not dp:
+                dp = constants.DEFAULT_DP_PATH
+            messages.append({"username":row[0],"message":row[1],"time":datetime.datetime.fromtimestamp(
+                int(row[2])).strftime(constants.DATE_FORMAT),"display_picture":dp})
 
         with open(constants.TEMPLATE_PATH+constants.CHATBOX_NAME,'r') as chat_template:
             template = chat_template.read()
-
         return template % {'username': username, 'host': self.host,
            'port': self.ssl_port if self.ssl else self.port, 'scheme': self.scheme,
-           'messages': "\n".join(messages) + "\n"}
+           'messages': json.dumps(messages),"display_picture":display_picture}
 
     @cherrypy.expose
     def ws(self, username):
@@ -137,6 +152,14 @@ if __name__ == '__main__':
         '/js': {
               'tools.staticdir.on': True,
               'tools.staticdir.dir': 'js'
+        },
+        '/styles': {
+              'tools.staticdir.on': True,
+              'tools.staticdir.dir': 'stylesheets'
+        },
+        '/images': {
+              'tools.staticdir.on': True,
+              'tools.staticdir.dir': 'images'
         },
     }
 
