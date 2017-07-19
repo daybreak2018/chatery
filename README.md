@@ -1,27 +1,32 @@
-##Chatery
-#####Simple Chat Application usable in Mobile & Desktop Browsers.
+## Chatery
 
-###Usage:
+##### Simple Chat Application usable in Mobile & Desktop Browsers.
+
+### Usage:
 
 Simply fill in your username and you can start chatting. The user is allowed to upload an image to be displayed in the chatroom.
 
 Twitter support is available where the user can login using twitter.
 The user can tweet and retweet directly from the chatroom if logged in using Twitter.
 
-*Send Private Message to Someone*
+**Send Private Message to Someone**
+
 @Username: Message (or just click on display picture of the user)
 
-*Twitter Integration*
+**Twitter Integration**
+
 Twitter related features would only work if the user is logged in using twitter.
 
-*Tweet*
+**Tweet**
+
 tweet:twitter message (or click on twitter icon)
 
-*ReTweet*
+**ReTweet**
+
 Click on RT icon.
 
 
-###Implementation Details
+### Implementation Details
 
 Implemented Using:-
 
