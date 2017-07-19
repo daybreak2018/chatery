@@ -1,0 +1,7 @@
+cheroot==5.7.0
+CherryPy==11.0.0
+portend==2.1.2
+pytz==2017.2
+six==1.10.0
+tempora==1.8
+ws4py==0.4.2
