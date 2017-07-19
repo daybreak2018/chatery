@@ -51,6 +51,7 @@ class ChatPlugin(WebSocketPlugin):
     def del_client(self, name):
         del self.clients[name]
 
+
 class ChatWebSocketHandler(WebSocket):
     def opened(self):
         cherrypy.engine.publish('add-client', self.username, self)
@@ -58,6 +59,7 @@ class ChatWebSocketHandler(WebSocket):
     def received_message(self, m):
         text = m.data.decode('utf8')
         tweet_id = 0;
+        status=""
 
         timestamp = int(time.time())
 
@@ -68,22 +70,30 @@ class ChatWebSocketHandler(WebSocket):
         published_msg = {"username":self.username,"message":text,"time":datetime.datetime.fromtimestamp(
            int(timestamp)).strftime(constants.DATE_FORMAT),"display_picture":dp}
         if text.find("@") == -1:
-            # echo to all
-            if(text.find("tweet:")!=-1 or text.find("RT:")!=-1):
-                credentials = TWITTER_ACCESS_TOKEN_MAP.get(self.username)
-                if(credentials):
-                    if(text.find("RT:")!=-1):
-                        status = utils.tweet(credentials,text,True)
-                        published_msg["message"] = text = status.text
+            try:
+                # echo to all
+                if(text.find("tweet:")!=-1 or text.find("RT:")!=-1):
+                    credentials = TWITTER_ACCESS_TOKEN_MAP.get(self.username)
+                    if(credentials):
+                        if(text.find("RT:")!=-1):
+                            status = utils.tweet(credentials,text,True)
+                            if status:
+                                published_msg["message"] = text = status.text
+                        else:
+                            status = utils.tweet(credentials,text,False)
+
+                        if status:
+                            published_msg["tweet_id"] = tweet_id = str(status.id)
+                        else:
+                            status = "Stop"
                     else:
-                        status = utils.tweet(credentials,text,False)
-                    published_msg["tweet_id"] = tweet_id = str(status.id)
-                else:
-                    published_msg["message"] = published_msg["message"].replace("tweet:","").replace("RT:","")
+                        published_msg["message"] = published_msg["message"].replace("tweet:","").replace("RT:","")
 
-            cherrypy.engine.publish('websocket-broadcast', json.dumps(published_msg))
-
-            result = DB_MGR.run_query(DB_TABLE.get_insert_query(),[self.username, text, timestamp,tweet_id])
+                if status!="Stop":
+                    cherrypy.engine.publish('websocket-broadcast', json.dumps(published_msg))
+                    result = DB_MGR.run_query(DB_TABLE.get_insert_query(),[self.username, text, timestamp,tweet_id])
+            except Exception as  e:
+                cherrypy.log(e)
         else:
             # or echo to a single user
             left, message = text.rsplit(':', 1)
@@ -95,6 +105,7 @@ class ChatWebSocketHandler(WebSocket):
     def closed(self, code, reason="A client left the room without a proper explanation."):
         cherrypy.engine.publish('del-client', self.username)
         cherrypy.engine.publish('websocket-broadcast', TextMessage(reason))
+
 
 class Root(object):
     def __init__(self, host, port, ssl=False, ssl_port=9443):
@@ -182,7 +193,8 @@ class Root(object):
         cherrypy.request.ws_handler.username = username
         cherrypy.log("Handler created: %s" % repr(cherrypy.request.ws_handler))
 
-if __name__ == '__main__':
+
+def main():
     import logging
     from ws4py import configure_logger
     configure_logger(level=logging.DEBUG)
@@ -236,3 +248,7 @@ if __name__ == '__main__':
 
     app_root = Root(args.host, args.port, args.ssl, ssl_port=args.ssl_port)
     cherrypy.quickstart(app_root, '', config=config)
+
+
+if __name__=="__main__":
+    main()

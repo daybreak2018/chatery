@@ -11,6 +11,7 @@ def tweet(credentials, text, retweet):
     auth = tweepy.OAuthHandler(consumer_key=constants.CONSUMER_KEY, consumer_secret=constants.CONSUMER_SECRET)
     auth.set_access_token(credentials["key"],credentials["secret"])
     msg = text.replace("tweet:","").replace("RT:","")
+    status = ""
 
     api = tweepy.API(auth)
     try:
@@ -20,4 +21,5 @@ def tweet(credentials, text, retweet):
             status = api.update_status(msg)
     except tweepy.TweepError as e:
         print(e.reason)
+
     return status
