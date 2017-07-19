@@ -36,7 +36,7 @@
             </div>
             <div class="panel-body chat-background" id="msgListContainer">
 <label for="dp">Display Picture</label>
-                                                    <input type='file' name='dp' id='dp' class='form-control'/><br />
+    <input type='file' name='dp' id='dp' class='form-control'/><br />
 
     <form action='/chatroom' id='chatform' method='post'>
     <label for="username">Nickname</label>
@@ -44,12 +44,13 @@
         <input type='hidden' name='display_picture' id='display_picture' value=""/><br />
 <input id='send' type='submit' value='Set Details' class='btn btn-info'/>
       </form>
+
+                <a href="%(tweet_login)s"><img src="./images/signin.png" /></a>
             </div>
             <div class="panel-footer">
                 <div class="input-group">
 
-
-                                </div>
+                </div>
             </div>
         </div>
     </div>

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import time
-import sqlite3
 import argparse
 import random
 import os
+import tweepy
 
 import cherrypy
 
@@ -14,6 +14,7 @@ from ws4py.messaging import TextMessage
 import constants
 import json
 import  datetime
+import utils
 
 from dbutils.models import MessageTable
 from dbutils.managers import SQLiteDBManager
@@ -22,6 +23,7 @@ DB_TABLE = MessageTable(constants.DB_NAME,constants.DB_PATH)
 DB_MGR = SQLiteDBManager(DB_TABLE)
 
 DP_MAP = {}
+TWITTER_ACCESS_TOKEN_MAP = {}
 
 class ChatPlugin(WebSocketPlugin):
     def __init__(self, bus):
@@ -55,6 +57,7 @@ class ChatWebSocketHandler(WebSocket):
 
     def received_message(self, m):
         text = m.data.decode('utf8')
+        tweet_id = 0;
 
         timestamp = int(time.time())
 
@@ -66,9 +69,21 @@ class ChatWebSocketHandler(WebSocket):
            int(timestamp)).strftime(constants.DATE_FORMAT),"display_picture":dp}
         if text.find("@") == -1:
             # echo to all
+            if(text.find("tweet:")!=-1 or text.find("RT:")!=-1):
+                credentials = TWITTER_ACCESS_TOKEN_MAP.get(self.username)
+                if(credentials):
+                    if(text.find("RT:")!=-1):
+                        status = utils.tweet(credentials,text,True)
+                        published_msg["message"] = text = status.text
+                    else:
+                        status = utils.tweet(credentials,text,False)
+                    published_msg["tweet_id"] = tweet_id = str(status.id)
+                else:
+                    published_msg["message"] = published_msg["message"].replace("tweet:","").replace("RT:","")
+
             cherrypy.engine.publish('websocket-broadcast', json.dumps(published_msg))
 
-            result = DB_MGR.run_query(DB_TABLE.get_insert_query(),[self.username, text, timestamp])
+            result = DB_MGR.run_query(DB_TABLE.get_insert_query(),[self.username, text, timestamp,tweet_id])
         else:
             # or echo to a single user
             left, message = text.rsplit(':', 1)
@@ -88,18 +103,57 @@ class Root(object):
         self.ssl_port = ssl_port
         self.ssl = ssl
         self.scheme = 'wss' if ssl else 'ws'
+        self.twitter_request_token = ""
 
     @cherrypy.expose
     def index(self):
+        auth = tweepy.OAuthHandler(consumer_key=constants.CONSUMER_KEY, consumer_secret=constants.CONSUMER_SECRET,
+                 callback=constants.CALLBACK_URL)
+
+        auth.secure = True
+
+        #auth.set_access_token(constants.ACCESS_TOKEN,constants.ACCESS_SECRET)
+
+        try:
+            redirect_url = auth.get_authorization_url()
+            self.twitter_request_token = auth.request_token
+        except tweepy.TweepError as e:
+            cherrypy.log(e.reason)
+            redirect_url = ""
+
         with open(constants.TEMPLATE_PATH+constants.INDEX_NAME,'r') as chat_template:
             template = chat_template.read()
-        return template
+        return template % {"tweet_login":redirect_url}
 
     @cherrypy.expose
-    def chatroom(self, username=None,display_picture=None):
+    def chatroom(self, username=None,display_picture=None,oauth_verifier=None,oauth_token=None):
         username = username or "User%d" % random.randint(0, 100)
         display_picture = display_picture or constants.DEFAULT_DP_PATH
         messages = []
+
+        if "Twitter's" in username:
+            username = "".join(username.split("Twitter's"))
+
+
+        if(oauth_verifier):
+            try:
+                token = self.twitter_request_token
+                self.twitter_request_token = ""
+                auth = tweepy.OAuthHandler(consumer_key=constants.CONSUMER_KEY, consumer_secret=constants.CONSUMER_SECRET)
+                token['verifier'] = oauth_verifier
+                auth.request_token = token
+                auth.get_access_token(oauth_verifier)
+
+                api = tweepy.API(auth)
+                me = api.me()
+                username = "Twitter's "+me.screen_name
+
+                TWITTER_ACCESS_TOKEN_MAP[username] = utils.generate_twitter_access_object(auth.access_token,auth.access_token_secret)
+
+                display_picture = me.profile_image_url_https
+
+            except tweepy.TweepError as e:
+                cherrypy.log(e.reason)
 
         DP_MAP[username] = display_picture
 
@@ -108,8 +162,13 @@ class Root(object):
             dp = DP_MAP.get(row[0])
             if not dp:
                 dp = constants.DEFAULT_DP_PATH
+            if row[3]:
+                tweet_id = str(row[3])
+            else:
+                tweet_id = ""
+
             messages.append({"username":row[0],"message":row[1],"time":datetime.datetime.fromtimestamp(
-                int(row[2])).strftime(constants.DATE_FORMAT),"display_picture":dp})
+                int(row[2])).strftime(constants.DATE_FORMAT),"display_picture":dp,"tweet_id":tweet_id})
 
         with open(constants.TEMPLATE_PATH+constants.CHATBOX_NAME,'r') as chat_template:
             template = chat_template.read()

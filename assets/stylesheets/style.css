@@ -7,7 +7,24 @@
     background-color: #ed7663;
     border: none;
 }
+.twitteruser{
+    height: 20px;
+    width: 20px;
+    margin-right: 8px;
+}
 
+.retweet{
+    height: 15px;
+    line-height: 0px;
+    font-size: 15px;
+}
+
+.tweeter{
+    height: 28px;
+    width: 28px;
+    margin-right: 10px;
+    cursor: hand;
+}
 .panel-footer{
     background-color: #69a8C3;
     border:none;

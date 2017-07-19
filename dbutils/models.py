@@ -39,13 +39,14 @@ class MessageTable(DatabaseTable):
             CREATE TABLE MESSAGES (
                 username	TEXT,
                 message	TEXT,
-                created	TEXT
+                created	TEXT,
+                tweet_id INTEGER
             )
         """
 
         self._insert_query = """
-            INSERT INTO MESSAGES(username,message,created)
-             VALUES (?,?,?)"""
+            INSERT INTO MESSAGES(username,message,created,tweet_id)
+             VALUES (?,?,?,?)"""
 
         self._drop_all_rows = """
             DELETE FROM CATEGORY

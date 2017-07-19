@@ -2,11 +2,18 @@
  * Created by Shaurya on 17-07-2017.
  */
 
-function set_send_user(data){
-        $("#message").val("@"+data+":");
-}
-
 $(document).ready(function() {
+
+    function set_send_user(data){
+        $("#message").val("@"+data+":");
+    }
+
+    function tweet(){
+        $('#message').val("tweet:");
+    }
+
+    messageJson["tweet"] = tweet;
+
     rivets.formatters.eq = function(value, checkAgainst)
     {
       return (value == checkAgainst);
@@ -17,9 +24,23 @@ $(document).ready(function() {
       return (value != checkAgainst);
     };
 
+    rivets.formatters.sanitize = function(value)
+    {
+      return value.split("Twitter's ").join("");
+    };
+
+    rivets.formatters.isTwitter = function(value)
+    {
+      return value.indexOf("Twitter's ")>-1;
+    };
+
     rivets.binders.src = function(el,value){
         el.src = value;
     };
+
+    rivets.binders.value = function(el,value){
+        el.value=value;
+    }
     rivets.binders.click = function(el,value){
         el.onclick = function(){
             set_send_user(value);
@@ -27,6 +48,7 @@ $(document).ready(function() {
     };
 
     rivets.bind($('#msgList'), messageJson);
+    rivets.bind($('.panel-footer'), messageJson);
 
     function scrollSmoothToBottom (id) {
        var div = document.getElementById(id);
@@ -50,6 +72,11 @@ $(document).ready(function() {
             $('#chat').val($('#chat').val() + 'Bye bye...\n');
             ws.close(1000, username+' left the room');
 
+              var message = 'Bye bye...\n'+username+' left the room';
+              var now = new Date()
+              var msgObj = {"message":message,"time":now.getTime(),"username":"System Administrator"}
+              messageJson["messages"].push(msgObj);
+
             if(!e) e = window.event;
             e.stopPropagation();
             e.preventDefault();
@@ -62,14 +89,20 @@ $(document).ready(function() {
              ws.send(username+" entered the room");
           };
           ws.onclose = function(evt) {
-             $('#chat').val($('#chat').val() + 'Connection closed by server: ' + evt.code + ' \"' + evt.reason + '\". Refresh to reconnect.\n');
+             var message = 'Connection closed by server: ' + evt.code + ' \"' + evt.reason + '\". Refresh to reconnect.\n';
+              var now = new Date()
+              var msgObj = {"message":message,"time":now.getTime(),"username":"System Administrator"}
+              messageJson["messages"].push(msgObj);
           };
 
-          $('#send').click(function() {
+          $(document).on('click', '.retweet',function(event) {
+             ws.send("RT:"+event.target.value.toString());
+             return false;
+          });
+
+            $('#send').click(function() {
              ws.send($('#message').val());
              $('#message').val("");
              return false;
           });
-          //var textarea = document.getElementById('chat');
-          //textarea.scrollTop = textarea.scrollHeight;
         });

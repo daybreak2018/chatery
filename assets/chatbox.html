@@ -15,6 +15,8 @@
           var display_picture = "%(display_picture)s"
             var messageJson = {"messages": %(messages)s,"username":username};
 
+            console.log(messageJson);
+
 
 
       </script>
@@ -45,7 +47,17 @@
                                                 <div class="media-body chatbubble"  rv-class-current_user="msg.username | eq username">
                                                     {msg.message}
                                                     <br />
-                                                   <small rv-class-text-muted="msg.username | neq username" >{msg.username} | {msg.time}</small>
+                                                   <small rv-class-text-muted="msg.username | neq username" >
+                                                       <img  rv-if="msg.username | isTwitter" class="twitteruser" src="images/twitter.png">
+                                                       {msg.username | sanitize} | {msg.time}
+                                                       <span rv-if="username | isTwitter">
+                                                           <span rv-if="msg.username | neq username">
+                                                               <span rv-if="msg.tweet_id">
+                                                                    | <button class="btn btn-info retweet" rv-value="msg.tweet_id" type="button">RT</button>
+                                                               </span>
+                                                           </span>
+                                                       </span>
+                                                   </small>
                                                 </div>
                                             </div>
 
@@ -53,12 +65,20 @@
                                     </li>
                     </ul>
             </div>
+
             <div class="panel-footer">
+
                 <div class="input-group">
+                    <!--<img  rv-if="username | isTwitter" class="tweet_msg" src="images/twitter.png">-->
+                    <span class="input-group-btn">
+                                        <img  rv-on-click="tweet" rv-if="username | isTwitter" id="tweet" class="tweeter" src="images/twitter.png">
+                                    </span>
+
                                     <input id="message" type="text" class="form-control" placeholder="Enter Message" />
                                     <span class="input-group-btn">
                                         <button id="send" class="btn btn-info" type="button">Send</button>
                                     </span>
+
                                 </div>
             </div>
         </div>
