@@ -16,7 +16,6 @@ CHATBOX_NAME = "chatbox.html"
 #Settings
 DATE_FORMAT = "%B %d,%Y at %I:%M %p"
 DEFAULT_DP_PATH = "images/dp.jpg";
-timezone = "Asia/Kuala_Lumpur"
 
 #Twitter Settings
 CONSUMER_KEY = "Sb2J920e9N1EOz6s9vgVV8LvY"
