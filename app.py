@@ -108,13 +108,14 @@ class ChatWebSocketHandler(WebSocket):
             published_msg["message"] = to_username+"::"+message
             if not client:
                 client = cherrypy.engine.publish('get-client', self.username).pop()
-                published_msg["message"] = to_username+" is no longer in this chatroom"
+                published_msg["message"] = "Sorry, I am no longer in this chatroom"
                 published_msg["username"] = to_username
+                published_msg["display_picture"] = DP_MAP.get(to_username) or constants.DEFAULT_DP_PATH
             client.send(json.dumps(published_msg))
 
     def closed(self, code, reason="A client left the room without a proper explanation."):
         cherrypy.engine.publish('del-client', self.username)
-        cherrypy.engine.publish('websocket-broadcast', TextMessage(reason))
+        #cherrypy.engine.publish('websocket-broadcast', TextMessage(reason))
 
 
 class Root(object):
@@ -147,14 +148,46 @@ class Root(object):
         return template % {"tweet_login":redirect_url}
 
     @cherrypy.expose
-    def chatroom(self, username=None,display_picture=None,oauth_verifier=None,oauth_token=None):
+    def login(self,username=None,display_picture=None,oauth_verifier=None,oauth_token=None):
+        cookie = cherrypy.response.cookie
+
+        cookie['username'] = username or ""
+        cookie['username']['max-age'] = constants.COOKIE_MAX_AGE
+        cookie['username']['path'] = '/'
+
+        if(username):
+            display_picture = display_picture or constants.DEFAULT_DP_PATH
+            DP_MAP[username] = display_picture
+
+        cookie['oauth_verifier'] = oauth_verifier or ""
+        cookie['oauth_verifier']['max-age'] = constants.COOKIE_MAX_AGE
+        cookie['oauth_verifier']['path'] = '/'
+
+        cookie['oauth_token'] = oauth_token or ""
+        cookie['oauth_token']['max-age'] = constants.COOKIE_MAX_AGE
+        cookie['oauth_token']['path'] = '/'
+        raise cherrypy.HTTPRedirect("/chatroom")
+
+
+    @cherrypy.expose
+    def chatroom(self):
+        cookie = cherrypy.request.cookie
+
+        username = cookie.get("username").value if cookie.get("username") else ""
+        display_picture = cookie.get("display_picture").value if cookie.get("display_picture") else ""
+        oauth_verifier = cookie.get("oauth_verifier").value if cookie.get("oauth_verifier") else ""
+        oauth_token = cookie.get("oauth_token").value if cookie.get("oauth_token") else ""
+
+        if not (username or oauth_verifier):
+            raise cherrypy.HTTPRedirect("/")
+
         username = username or "User%d" % random.randint(0, 100)
-        display_picture = display_picture or constants.DEFAULT_DP_PATH
+
         messages = []
 
+        #Twitter's keyword not allowed in normal login.
         if "Twitter's" in username:
             username = "".join(username.split("Twitter's"))
-
 
         if(oauth_verifier):
             try:
@@ -172,11 +205,12 @@ class Root(object):
                 TWITTER_ACCESS_TOKEN_MAP[username] = utils.generate_twitter_access_object(auth.access_token,auth.access_token_secret)
 
                 display_picture = me.profile_image_url_https
+                DP_MAP[username] = display_picture
 
             except tweepy.TweepError as e:
                 cherrypy.log(e.reason)
 
-        DP_MAP[username] = display_picture
+
         timezone = pytz.timezone(TIMEZONE)
 
         result = DB_MGR.run_query(DB_TABLE.get_limited_get_query(),[])

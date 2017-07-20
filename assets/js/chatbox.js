@@ -70,12 +70,12 @@ $(document).ready(function() {
 
           window.onbeforeunload = function(e) {
             $('#chat').val($('#chat').val() + 'Bye bye...\n');
+              var message = 'Bye bye...\n'+username+' left the room';
+              ws.send(message);
             ws.close(1000, username+' left the room');
 
-              var message = 'Bye bye...\n'+username+' left the room';
-              var now = new Date()
-              var msgObj = {"message":message,"time":now.getTime(),"username":"System Administrator"}
-              messageJson["messages"].push(msgObj);
+
+
 
             if(!e) e = window.event;
             e.stopPropagation();
