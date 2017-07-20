@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
+import pytz
 import argparse
 import random
 import os
@@ -13,7 +14,6 @@ from ws4py.messaging import TextMessage
 
 import constants
 import json
-import  datetime
 import utils
 
 from dbutils.models import MessageTable
@@ -24,6 +24,8 @@ DB_MGR = SQLiteDBManager(DB_TABLE)
 
 DP_MAP = {}
 TWITTER_ACCESS_TOKEN_MAP = {}
+
+TIMEZONE = "GMT"
 
 class ChatPlugin(WebSocketPlugin):
     def __init__(self, bus):
@@ -46,10 +48,12 @@ class ChatPlugin(WebSocketPlugin):
         self.clients[name] = websocket
 
     def get_client(self, name):
-        return self.clients[name]
+        if name in self.clients:
+            return self.clients[name]
 
     def del_client(self, name):
-        del self.clients[name]
+        if name in self.clients:
+            del self.clients[name]
 
 
 class ChatWebSocketHandler(WebSocket):
@@ -60,15 +64,17 @@ class ChatWebSocketHandler(WebSocket):
         text = m.data.decode('utf8')
         tweet_id = 0;
         status=""
+        timezone = pytz.timezone(TIMEZONE)
 
-        timestamp = int(time.time())
+        isoTime = utils.to_iso8601(timezone)
+
+        curr_time = utils.from_iso8601(timezone, isoTime)
 
         dp = DP_MAP.get(self.username)
         if not dp:
             dp = constants.DEFAULT_DP_PATH
 
-        published_msg = {"username":self.username,"message":text,"time":datetime.datetime.fromtimestamp(
-           int(timestamp)).strftime(constants.DATE_FORMAT),"display_picture":dp}
+        published_msg = {"username":self.username,"message":text,"time":curr_time.strftime(constants.DATE_FORMAT),"display_picture":dp}
         if text.find("@") == -1:
             try:
                 # echo to all
@@ -91,7 +97,7 @@ class ChatWebSocketHandler(WebSocket):
 
                 if status!="Stop":
                     cherrypy.engine.publish('websocket-broadcast', json.dumps(published_msg))
-                    result = DB_MGR.run_query(DB_TABLE.get_insert_query(),[self.username, text, timestamp,tweet_id])
+                    result = DB_MGR.run_query(DB_TABLE.get_insert_query(),[self.username, text, isoTime,tweet_id])
             except Exception as  e:
                 cherrypy.log(e)
         else:
@@ -100,6 +106,10 @@ class ChatWebSocketHandler(WebSocket):
             from_username, to_username = left.split('@')
             client = cherrypy.engine.publish('get-client', to_username.strip()).pop()
             published_msg["message"] = to_username+"::"+message
+            if not client:
+                client = cherrypy.engine.publish('get-client', self.username).pop()
+                published_msg["message"] = to_username+" is no longer in this chatroom"
+                published_msg["username"] = to_username
             client.send(json.dumps(published_msg))
 
     def closed(self, code, reason="A client left the room without a proper explanation."):
@@ -119,7 +129,7 @@ class Root(object):
     @cherrypy.expose
     def index(self):
         auth = tweepy.OAuthHandler(consumer_key=constants.CONSUMER_KEY, consumer_secret=constants.CONSUMER_SECRET,
-                 callback=constants.CALLBACK_URL)
+                 callback=self.host+constants.CALLBACK_URL)
 
         auth.secure = True
 
@@ -167,6 +177,7 @@ class Root(object):
                 cherrypy.log(e.reason)
 
         DP_MAP[username] = display_picture
+        timezone = pytz.timezone(TIMEZONE)
 
         result = DB_MGR.run_query(DB_TABLE.get_limited_get_query(),[])
         for row in result:
@@ -178,13 +189,13 @@ class Root(object):
             else:
                 tweet_id = ""
 
-            messages.append({"username":row[0],"message":row[1],"time":datetime.datetime.fromtimestamp(
-                int(row[2])).strftime(constants.DATE_FORMAT),"display_picture":dp,"tweet_id":tweet_id})
+            curr_time = utils.from_iso8601(timezone, row[2])
+
+            messages.append({"username":row[0],"message":row[1],"time":curr_time.strftime(constants.DATE_FORMAT),"display_picture":dp,"tweet_id":tweet_id})
 
         with open(constants.TEMPLATE_PATH+constants.CHATBOX_NAME,'r') as chat_template:
             template = chat_template.read()
-        return template % {'username': username, 'host': self.host,
-           'port': self.ssl_port if self.ssl else self.port, 'scheme': self.scheme,
+        return template % {'username': username,'port': self.ssl_port if self.ssl else self.port, 'scheme': self.scheme,
            'messages': json.dumps(messages),"display_picture":display_picture}
 
     @cherrypy.expose
@@ -197,6 +208,7 @@ class Root(object):
 def main():
     import logging
     from ws4py import configure_logger
+    global TIMEZONE
     configure_logger(level=logging.DEBUG)
 
     parser = argparse.ArgumentParser(description='Echo CherryPy Server')
@@ -207,7 +219,11 @@ def main():
     parser.add_argument('--cert', default='./server.crt', type=str)
     parser.add_argument('--key', default='./server.key', type=str)
     parser.add_argument('--chain', default='./server.chain', type=str)
+    parser.add_argument('--tz', default='GMT', type=str)
+
     args = parser.parse_args()
+
+    TIMEZONE = args.tz
 
     cherrypy.config.update({
         'server.socket_host': args.host,
@@ -246,9 +262,9 @@ def main():
     ChatPlugin(cherrypy.engine).subscribe()
     cherrypy.tools.websocket = WebSocketTool()
 
-    app_root = Root(args.host, args.port, args.ssl, ssl_port=args.ssl_port)
+    app_root = Root(args.host, args.port,args.ssl, ssl_port=args.ssl_port)
     cherrypy.quickstart(app_root, '', config=config)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()

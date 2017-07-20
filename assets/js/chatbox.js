@@ -101,7 +101,9 @@ $(document).ready(function() {
           });
 
             $('#send').click(function() {
-             ws.send($('#message').val());
+                if($('#message').val()) {
+                    ws.send($('#message').val());
+                }
              $('#message').val("");
              return false;
           });

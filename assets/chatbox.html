@@ -11,14 +11,9 @@
 
         <script type='application/javascript'>
           var username = "%(username)s";
-            var websocket = '%(scheme)s://%(host)s:%(port)s/ws?username='+username;
+            var websocket = '%(scheme)s://'+window.location.hostname+':%(port)s/ws?username='+username;
           var display_picture = "%(display_picture)s"
             var messageJson = {"messages": %(messages)s,"username":username};
-
-            console.log(messageJson);
-
-
-
       </script>
 
 
