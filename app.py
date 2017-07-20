@@ -129,7 +129,7 @@ class Root(object):
     @cherrypy.expose
     def index(self):
         auth = tweepy.OAuthHandler(consumer_key=constants.CONSUMER_KEY, consumer_secret=constants.CONSUMER_SECRET,
-                 callback=self.host+constants.CALLBACK_URL)
+                 callback=constants.CALLBACK_URL)
 
         auth.secure = True
 

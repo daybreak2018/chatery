@@ -23,6 +23,15 @@
             }
 
             document.getElementById("dp").addEventListener("change", readFile);
+
+            var twitter_login_url = "%(tweet_login)s";
+            var signin_button = $("#twitter_signin")[0];
+            if(twitter_login_url.length){
+                signin_button.href = twitter_login_url;
+            }
+            else{
+                signin_button.style.display = "none"
+            }
         });
     </script>
 
@@ -45,7 +54,7 @@
 <input id='send' type='submit' value='Set Details' class='btn btn-info'/>
       </form>
 
-                <a href="%(tweet_login)s"><img src="./images/signin.png" /></a>
+                <a id="twitter_signin" href=""><img src="./images/signin.png" /></a>
             </div>
             <div class="panel-footer">
                 <div class="input-group">
