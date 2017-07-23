@@ -15,10 +15,6 @@ class DatabaseTable(object):
         pass
 
     @abstractmethod
-    def delete_database(self):
-        pass
-
-    @abstractmethod
     def get_insert_query(self):
         pass
 
@@ -27,6 +23,10 @@ class DatabaseTable(object):
         pass
 
 
+
+#Should not be like this. Table & DB is one and the same table here.
+#Should be a DB Table which should have a has-a relationship of multiple tables.
+#Need to rewrite. Should work in this context as there is only one table.
 class MessageTable(DatabaseTable):
     """DB Model to specify the message table in DB"""
     def __init__(self,dbname,path):
@@ -49,7 +49,7 @@ class MessageTable(DatabaseTable):
              VALUES (?,?,?,?)"""
 
         self._drop_all_rows = """
-            DELETE FROM CATEGORY
+            DELETE FROM MESSAGES
         """
 
         self._get_all_rows = "SELECT * FROM MESSAGES"
@@ -70,3 +70,6 @@ class MessageTable(DatabaseTable):
 
     def get_limited_get_query(self):
         return self._get_limited_rows
+
+    def get_db_path(self):
+        return self.path

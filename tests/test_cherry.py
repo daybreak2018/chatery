@@ -3,6 +3,14 @@ import urllib
 import cherrypy
 
 import app
+from unittest.mock import MagicMock, call
+
+from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
+from ws4py.websocket import EchoWebSocket
+from ws4py.framing import Frame, OPCODE_TEXT, OPCODE_CLOSE
+
+import socket
+import time
 
 local = cherrypy.lib.httputil.Host('127.0.0.1', 9000, "")
 remote = cherrypy.lib.httputil.Host('127.0.0.1', 9004, "")
@@ -15,40 +23,29 @@ def setupServer():
 
     cherrypy.config.update({
         'server.socket_host': "127.0.0.1",
-        'server.socket_port': "9000",
-        'tools.staticdir.root': os.path.abspath(os.path.join(os.path.dirname(__file__), 'assets')),
+        'server.socket_port': 9000,
     })
     config = {
         '/ws': {
             'tools.websocket.on': True,
             'tools.websocket.handler_cls': app.ChatWebSocketHandler,
             'tools.websocket.protocols': ['toto', 'mytest', 'hithere']
-        },
-        '/js': {
-              'tools.staticdir.on': True,
-              'tools.staticdir.dir': 'js'
-        },
-        '/styles': {
-              'tools.staticdir.on': True,
-              'tools.staticdir.dir': 'stylesheets'
-        },
-        '/images': {
-              'tools.staticdir.on': True,
-              'tools.staticdir.dir': 'images'
-        },
+        }
     }
 
     app.ChatPlugin(cherrypy.engine).subscribe()
     cherrypy.tools.websocket = app.WebSocketTool()
 
-    app_root = app.Root("127.0.0.1", "9000", None)
-    cherrypy.quickstart(app_root, '', config=config)
+    app_root = app.Root("127.0.0.1", 9000, None)
+    cherrypy.tree.mount(app_root,'/',config)
+    cherrypy.engine.start()
 
 def setUpModule():
     cherrypy.config.update({'environment': "test_suite"})
-    setupServer()
+
     # prevent the HTTP server from ever starting
     cherrypy.server.unsubscribe()
+    setupServer()
 
 setup_module = setUpModule
 
@@ -62,13 +59,13 @@ class BaseCherryPyTestCase(unittest.TestCase):
         qs = fd = None
 
         if method in ['POST', 'PUT']:
-            qs = urllib.urlencode(kwargs)
+            qs = urllib.parse.urlencode(kwargs)
             headers.append(('content-type', 'application/x-www-form-urlencoded'))
             headers.append(('content-length', '%d' % len(qs)))
             fd = str(qs)
             qs = None
         elif kwargs:
-            qs = urllib.urlencode(kwargs)
+            qs = urllib.parse.urlencode(kwargs)
 
         # Get our application and run the request against it
         app = cherrypy.tree.apps['']
@@ -82,7 +79,7 @@ class BaseCherryPyTestCase(unittest.TestCase):
                 fd.close()
                 fd = None
 
-        if response.output_status.startswith('500'):
+        if response.output_status.startswith(b'500'):
             print(response.body)
             raise AssertionError("Unexpected error")
 
@@ -92,20 +89,14 @@ class BaseCherryPyTestCase(unittest.TestCase):
 
 class TestCherryPyApp(BaseCherryPyTestCase):
     def test_index(self):
-        print("Hereppp")
         response = self.webapp_request('/')
-        self.assertEqual(response.output_status, '200 OK')
+        self.assertEqual(response.output_status, b'200 OK')
         # response body is wrapped into a list internally by CherryPy
-        self.assertEqual(response.body, ['hello world'])
+        self.assertEqual(response.headers["Content-Type"], 'text/html;charset=utf-8')
 
-    def test_echo(self):
-        response = self.webapp_request('/echo', msg="hey there")
-        self.assertEqual(response.output_status, '200 OK')
-        self.assertEqual(response.body, ["hey there"])
-
-        response = self.webapp_request('/echo', method='POST', msg="hey there")
-        self.assertEqual(response.output_status, '200 OK')
-        self.assertEqual(response.body, ["hey there"])
+    def test_login(self):
+        response = self.webapp_request('/login')
+        self.assertEqual(response.output_status, b'303 See Other')
 
 if __name__ == '__main__':
     unittest.main()

@@ -11,8 +11,13 @@ class SQLiteDBManager(object):
         self.create_and_connect()
 
     def create_and_connect(self):
+        construct = False
         if not os.path.isdir(os.path.dirname(self.db.path)):
             os.mkdir(os.path.dirname(self.db.path))
+            construct = True
+        if not os.path.exists(self.db.path):
+            construct = True
+        if construct:
             self.construct_structure()
 
     def run_query(self,query,vals):
