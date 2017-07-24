@@ -35,18 +35,11 @@ Implemented Using:-
 
 
 Setting up dev instance:-
+    ./install.sh
 
-    sudo apt-get install python3-pip
-    sudo pip3 install virtualenv
-    virtualenv chatery
-    Navigate to catery->bin
-    source activate
-    Navigate to chatery (application directory)
-    pip install -r requirements.txt
-    python app.py
-
-
-This should get an instance running on your dev instance on 127.0.0.1:9000
+Run Instance
+    Edit Caddyfile and edit the first line to provide the correct tld/ip
+    ./run.sh
 
 Following flags are available
 - [--host HOST]
