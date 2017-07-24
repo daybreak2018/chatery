@@ -1,5 +1,6 @@
-your.tld.com {
+0.0.0.0 {
     proxy / 0.0.0.0:8266 {
         transparent
+		websocket
     }
 }
