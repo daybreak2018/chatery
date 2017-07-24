@@ -1,5 +1,5 @@
-192.168.0.101 {
-    proxy / 127.0.0.1:9000 {
+your.tld.com {
+    proxy / 0.0.0.0:8266 {
         transparent
     }
 }
