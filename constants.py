@@ -14,7 +14,7 @@ CHATBOX_NAME = "chatbox.html"
 
 
 #Settings
-DATE_FORMAT = "%B %d,%Y at %I:%M %p"
+DATE_FORMAT = "%B %d, %I:%M %p"
 DEFAULT_DP_PATH = "images/dp.jpg";
 
 COOKIE_MAX_AGE = 3600

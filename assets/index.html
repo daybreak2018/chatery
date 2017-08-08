@@ -1,67 +1,92 @@
 <html>
-    <head>
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-        <link rel="stylesheet" href="./styles/style.css">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="./styles/style.css">
 
-        <script   src="https://code.jquery.com/jquery-1.12.4.min.js"   integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="   crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
 
+  <script>
+    $(document).ready(function() {
+      function readFile() {
+        if (this.files && this.files[0]) {
+          var FR = new FileReader();
 
-<script>
-        $(document).ready(function() {
-            function readFile() {
-                if (this.files && this.files[0]) {
-                    var FR = new FileReader();
+          FR.addEventListener("load", function (e) {
+            console.log(e.target.result);
+            $('#display_picture').val(e.target.result);
+          });
 
-                    FR.addEventListener("load", function (e) {
-                        console.log(e.target.result);
-                        $('#display_picture').val(e.target.result);
-                    });
+          FR.readAsDataURL(this.files[0]);
+        }
+      }
 
-                    FR.readAsDataURL(this.files[0]);
-                }
-            }
+      document.getElementById("dp").addEventListener("change", readFile);
 
-            document.getElementById("dp").addEventListener("change", readFile);
+      var twitter_login_url = "%(tweet_login)s";
+      var signin_button = $("#twitter_signin")[0];
+      if(twitter_login_url.length){
+        signin_button.href = twitter_login_url;
+      }
+      else{
+        signin_button.style.display = "none"
+      }
+    });
+  </script>
+</head>
 
-            var twitter_login_url = "%(tweet_login)s";
-            var signin_button = $("#twitter_signin")[0];
-            if(twitter_login_url.length){
-                signin_button.href = twitter_login_url;
-            }
-            else{
-                signin_button.style.display = "none"
-            }
-        });
-    </script>
-
-
-    </head>
-    <body>
-    <div class="col-md-12 chat-container">
-        <div class="panel panel-info">
-            <div class="panel-heading">
-                PyConMy APAC 2017
-            </div>
-            <div class="panel-body chat-background" id="msgListContainer">
-<label for="dp">Display Picture</label>
-    <input type='file' name='dp' id='dp' class='form-control'/><br />
-
-    <form action='/login' id='chatform' method='post'>
-    <label for="username">Nickname</label>
-      <input type='text' name='username' id='username' class='form-control'/><br />
-        <input type='hidden' name='display_picture' id='display_picture' value=""/><br />
-<input id='send' type='submit' value='Set Details' class='btn btn-info'/>
-      </form>
-
-                <a id="twitter_signin" href=""><img src="./images/signin.png" /></a>
-            </div>
-            <div class="panel-footer">
-                <div class="input-group">
-
-                </div>
-            </div>
+<body class="index">
+  <div class="panel-body login" id="msgListContainer">
+    <div class="wrapper">
+      <div class="title">
+        <img src="images/xoxzo_navbar_logo_w_trans.png">
+        <h1>PyCon APAC 2017</h1>
+      </div>
+      <div class="row">
+        <div class="col-xs-3 col-sm-2">
+          <div class="upload-button">
+            <img src="./images/set_pic.png" class="profile-pic">
+          </div>
         </div>
+        <input type='file' name='dp' id='dp' class="file-upload">
+
+        <form action='/login' id='chatform' method='post'>
+          <div class="col-xs-9 col-sm-10 nickname">
+            <input type='text' name='username' id='username' class='form-control' placeholder="Nickname">
+          </div>
+          <input type='hidden' name='display_picture' id='display_picture' value=""/>
+          <div class="col-xs-12 submit">
+            <p>This is an unofficial app :<br>Not endorsed by the conference.</p>
+            <input id='send' type='submit' value='Enter Chatroom' class='btn set-btn'>
+          </div>
+        </form>
+      </div>
+      <a id="twitter_signin" href="" class="btn set-btn">
+        <img src="./images/twitter.png"> Sign in with Twitter
+      </a>
     </div>
-    </body>
-    </html>
+  </div>
+
+  <script>
+  $(document).ready(function() {
+    var readURL = function(input) {
+      if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          $('.profile-pic').attr('src', e.target.result);
+        }
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    $(".file-upload").on('change', function(){
+        readURL(this);
+    });
+    
+    $(".upload-button").on('click', function() {
+       $(".file-upload").click();
+    });
+  });
+  </script>
+</body>
+</html>
