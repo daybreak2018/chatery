@@ -28,7 +28,7 @@ setup(
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'chatery = app:main',
+            'chatery = chatery:main',
         ],
     },
     zip_safe=False
