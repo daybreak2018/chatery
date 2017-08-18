@@ -56,8 +56,16 @@ $(document).ready(function() {
           scrollTop: div.scrollHeight - div.clientHeight
        }, 500);
     }
+	
+	$('#next').click(function() {
+            window.location.href = window.location.href.split("?")[0] + "?start=" + (start+100)
+          });
+		  
+		  $('#previous').click(function() {
+            window.location.href = window.location.href.split("?")[0] + "?start="+(start>0 ? start-100 : 0)
+          });
 
-    if (window.WebSocket) {
+    if (window.WebSocket && websocket) {
             ws = new WebSocket(websocket, ['mytest']);
           }
           else if (window.MozWebSocket) {

@@ -11,7 +11,7 @@ DB_NAME = "DB"
 TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),"assets/")
 INDEX_NAME = "index.html"
 CHATBOX_NAME = "chatbox.html"
-
+ARCHIVE_NAME = "archive.html"
 
 #Settings
 DATE_FORMAT = "%B %d, %I:%M %p"

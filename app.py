@@ -170,6 +170,39 @@ class Root(object):
 
 
     @cherrypy.expose
+    def archive(self,start=None):
+        timezone = pytz.timezone(TIMEZONE)
+        for row in DB_MGR.run_query(DB_TABLE.get_count(),[]):
+            count = row[0]
+        if not start or int(start)>=count:
+            start = count-100 if count-100>0 else 0
+			
+        if int(start)<0:
+            start=0
+            
+        
+        messages = []
+
+        result = DB_MGR.run_query(DB_TABLE.get_limited_start(),[int(start)])
+        for row in result:
+            dp = DP_MAP.get(row[0])
+            if not dp:
+                dp = constants.DEFAULT_DP_PATH
+            if row[3]:
+                tweet_id = str(row[3])
+            else:
+                tweet_id = ""
+
+            curr_time = utils.from_iso8601(timezone, row[2])
+
+            messages.append({"username":row[0],"message":row[1],"time":curr_time.strftime(constants.DATE_FORMAT),"display_picture":dp,"tweet_id":tweet_id})
+
+        with open(constants.TEMPLATE_PATH+constants.ARCHIVE_NAME,'r') as chat_template:
+            template = chat_template.read()
+        return template % {'username': "none",'port': self.ssl_port if self.ssl else self.port, 'scheme': self.scheme,
+           'messages': json.dumps(messages),"start":start}
+
+    @cherrypy.expose
     def chatroom(self):
         cookie = cherrypy.request.cookie
 
@@ -237,6 +270,7 @@ class Root(object):
         # let's track the username we chose
         cherrypy.request.ws_handler.username = username
         cherrypy.log("Handler created: %s" % repr(cherrypy.request.ws_handler))
+
 
 
 def main():

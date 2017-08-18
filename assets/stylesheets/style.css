@@ -254,6 +254,50 @@
   outline: none;
 }
 
+
+#next.input-group-btn {
+  width: 70px;
+}
+
+#next.input-group-btn button {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  background: #4683ff;
+  color: white;
+}
+
+#next.input-group-btn button:active {
+  background: #2d68e0;
+}
+
+#next.input-group-btn button:focus {
+  outline: none;
+}
+
+
+#previous.input-group-btn {
+  width: 70px;
+}
+
+#previous.input-group-btn button {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  background: #4683ff;
+  color: white;
+}
+
+#previous.input-group-btn button:active {
+  background: #2d68e0;
+}
+
+#previous.input-group-btn button:focus {
+  outline: none;
+}
+
+
+
 .input-group-btn:last-child>.btn {
   z-index: 3;
 }
@@ -282,4 +326,10 @@
 
 .btn.retweet:focus {
   outline: none;
+}
+
+a.source-link{
+
+color: #bbb;
+
 }

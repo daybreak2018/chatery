@@ -11,10 +11,9 @@
 
 
   <script type='application/javascript'>
-    var username = "%(username)s";
-    var websocket = ("https:"===window.location.protocol?"wss://":"ws://")+window.location.hostname+':%(port)s/ws?username='+username;
-    var display_picture = "%(display_picture)s"
-    var messageJson = {"messages": %(messages)s,"username":username};
+	var websocket = false
+	var start = %(start)s
+    var messageJson = {"messages": %(messages)s};
   </script>
 </head>
 
@@ -29,17 +28,9 @@
           <div class="chatbubble">
             <div class="username">
               {msg.username | sanitize} 
-              <img rv-if="msg.username | isTwitter" class="twitteruser" src="images/twitter.png">
             </div>
             <div class="message">{msg.message}</div>
             <div class="message-info">
-              <span rv-if="username | isTwitter">
-                <span rv-if="msg.username | neq username">
-                  <span rv-if="msg.tweet_id">
-                    <button class="btn retweet" rv-value="msg.tweet_id" type="button">RT</button>
-                  </span>
-                </span>
-              </span>
               <span class="time">{msg.time}</span>
             </div>
           </div>
@@ -50,14 +41,11 @@
 
   <div class="panel-footer">
     <div class="input-group">
-      <span class="input-group-btn">
-        <img rv-on-click="tweet" rv-if="username | isTwitter" id="tweet" class="twitter" src="images/twitter.png">
+	<span id="previous" class="input-group-btn">
+        <button class="btn" type="button">Previous</button>
       </span>
-      <span class="text">
-        <textarea id="message" type="text" class="form-control"></textarea>
-      </span>
-      <span id="send" class="input-group-btn">
-        <button class="btn" type="button">Send</button>
+	  <span id="next" class="input-group-btn">
+        <button class="btn" type="button">Next</button>
       </span>
      </div>
   </div>

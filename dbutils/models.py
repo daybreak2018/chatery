@@ -37,9 +37,9 @@ class MessageTable(DatabaseTable):
 
         self._createquery = """
             CREATE TABLE MESSAGES (
-                username	TEXT,
-                message	TEXT,
-                created	TEXT,
+                username    TEXT,
+                message    TEXT,
+                created    TEXT,
                 tweet_id INTEGER
             )
         """
@@ -51,7 +51,12 @@ class MessageTable(DatabaseTable):
         self._drop_all_rows = """
             DELETE FROM MESSAGES
         """
-
+        
+        self._count_rows = "SELECT count(*) from MESSAGES"
+        
+        self._get_limited_start = "SELECT * FROM MESSAGES LIMIT 100 OFFSET ?"
+        
+        
         self._get_all_rows = "SELECT * FROM MESSAGES"
 
         self._get_limited_rows = "SELECT * FROM MESSAGES LIMIT 1000"
@@ -70,6 +75,12 @@ class MessageTable(DatabaseTable):
 
     def get_limited_get_query(self):
         return self._get_limited_rows
+        
+    def get_count(self):
+        return self._count_rows
+        
+    def get_limited_start(self):
+        return self._get_limited_start
 
     def get_db_path(self):
         return self.path
