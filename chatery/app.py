@@ -12,12 +12,12 @@ from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
 from ws4py.websocket import WebSocket
 from ws4py.messaging import TextMessage
 
-import constants
+import chatery.constants as constants
 import json
-import utils
+import chatery.utils as utils
 
-from dbutils.models import MessageTable
-from dbutils.managers import SQLiteDBManager
+from chatery.dbutils.models import MessageTable
+from chatery.dbutils.managers import SQLiteDBManager
 
 DB_TABLE = MessageTable(constants.DB_NAME,constants.DB_PATH)
 DB_MGR = SQLiteDBManager(DB_TABLE)

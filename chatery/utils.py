@@ -1,7 +1,7 @@
 __author__ = 'shaurya'
 
 import tweepy
-import constants
+import chatery.constants
 import datetime
 import dateutil
 
