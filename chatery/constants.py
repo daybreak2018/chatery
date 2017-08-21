@@ -4,11 +4,11 @@ import os
 
 #DB Details
 
-DB_PATH = os.path.join("/tmp/","database/")
+DB_PATH = os.path.join(os.path.expanduser("~"),"database/")
 DB_NAME = "DB"
 
 #Template Path
-TEMPLATE_PATH = os.path.join(os.path.expanduser("~"),"assets/")
+TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),"assets/")
 INDEX_NAME = "index.html"
 CHATBOX_NAME = "chatbox.html"
 ARCHIVE_NAME = "archive.html"
