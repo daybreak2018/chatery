@@ -21,16 +21,17 @@
 }
 
 .login .title {
-  padding-bottom: 70px;
+  padding-bottom: 55px;
 }
 
 .login .title img {
-  width: 200px;
+  width: 150px;
 }
 
 .login .title h1 {
-  font-size: 2.3rem;
+  font-size: 2rem;
   font-weight: 600;
+  margin-top: 10px;
 }
 
 .login .nickname {
@@ -53,8 +54,8 @@
 }
 
 .login .submit {
-  margin-top: 90px;
-  color: #bbb;
+  margin-top: 65px;
+  color: #999;
   font-size: 1.25rem;
 }
 
@@ -86,6 +87,34 @@
 
 .login .file-upload {
   display: none;
+}
+
+.login .sub-link {
+  margin-top: 20px;
+  font-size: 1.25rem;
+}
+
+.login .sub-link a {
+  color: #bbb;
+  text-decoration: underline;
+}
+
+.login #archives {
+  text-align: left;
+  padding-left: 2px;
+}
+
+.login #source {
+  text-align: right;
+  padding-right: 2px;
+}
+
+.archives .panel-footer {
+  padding: 0;
+}
+
+.archives .panel-footer #next button {
+  border-left: 1px solid #316fee;
 }
 
 .panel-body {
@@ -203,7 +232,7 @@
   background-color: #f5f5f5;
   height: 13%;
   border-top: 1px solid #e5e5e5;
-  padding: 8px;
+  padding: 4px;
   border-radius: 0;
 }
 
@@ -234,69 +263,26 @@
   border-right: none;
 }
 
-#send.input-group-btn {
+.action-btn {
   width: 70px;
 }
 
-#send.input-group-btn button {
+.action-btn button {
   width: 100%;
   height: 100%;
   border-radius: 0;
   background: #4683ff;
   color: white;
+  padding: 0;
 }
 
-#send.input-group-btn button:active {
+.action-btn button:active {
   background: #2d68e0;
 }
 
-#send.input-group-btn button:focus {
+.action-btn button:focus {
   outline: none;
 }
-
-
-#next.input-group-btn {
-  width: 70px;
-}
-
-#next.input-group-btn button {
-  width: 100%;
-  height: 100%;
-  border-radius: 0;
-  background: #4683ff;
-  color: white;
-}
-
-#next.input-group-btn button:active {
-  background: #2d68e0;
-}
-
-#next.input-group-btn button:focus {
-  outline: none;
-}
-
-
-#previous.input-group-btn {
-  width: 70px;
-}
-
-#previous.input-group-btn button {
-  width: 100%;
-  height: 100%;
-  border-radius: 0;
-  background: #4683ff;
-  color: white;
-}
-
-#previous.input-group-btn button:active {
-  background: #2d68e0;
-}
-
-#previous.input-group-btn button:focus {
-  outline: none;
-}
-
-
 
 .input-group-btn:last-child>.btn {
   z-index: 3;
@@ -326,10 +312,4 @@
 
 .btn.retweet:focus {
   outline: none;
-}
-
-a.source-link{
-
-color: #bbb;
-
 }

@@ -11,13 +11,13 @@
 
 
   <script type='application/javascript'>
-	var websocket = false
-	var start = %(start)s
+    var websocket = false
+    var start = %(start)s
     var messageJson = {"messages": %(messages)s};
   </script>
 </head>
 
-<body>
+<body class="archives">
   <div class="panel-body chat-background chatroom" id="msgListContainer">
     <ul class="media-list" id="msgList">
       <li class="media" rv-each-msg="messages">
@@ -41,11 +41,11 @@
 
   <div class="panel-footer">
     <div class="input-group">
-	<span id="previous" class="input-group-btn">
-        <button class="btn" type="button">Previous</button>
+      <span id="previous" class="input-group-btn action-btn">
+        <button class="btn" type="button">〈 Previous</button>
       </span>
-	  <span id="next" class="input-group-btn">
-        <button class="btn" type="button">Next</button>
+      <span id="next" class="input-group-btn action-btn">
+        <button class="btn" type="button">Next 〉</button>
       </span>
      </div>
   </div>
