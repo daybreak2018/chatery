@@ -131,7 +131,8 @@
 }
 
 .chatroom {
-  height: 87%;
+  height: 100%;
+  padding-bottom: 60px;
 }
 
 .chatbubble {
@@ -230,10 +231,13 @@
 
 .panel-footer {
   background-color: #f5f5f5;
-  height: 13%;
+  height: 60px;
   border-top: 1px solid #e5e5e5;
   padding: 4px;
   border-radius: 0;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
 }
 
 .panel-footer .input-group {
@@ -241,20 +245,16 @@
   height: 100%;
 }
 
-.panel-footer .text {
-  display: table-cell;
-  vertical-align: middle;
-}
-
-.panel-footer textarea {
-  resize: none;
+.panel-footer span#send button {
+  height: 50px;
 }
 
 #message.form-control {
   box-shadow: none;
   border: 1px solid #e5e5e5;
   border-right: none;
-  height: 100%;
+  height: 50px;
+  resize: none;
 }
 
 #message.form-control:focus {
