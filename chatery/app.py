@@ -244,7 +244,7 @@ class Root(object):
                 cherrypy.log(e.reason)
 
 
-        timezone = pytz.timezone(TIMEZONE)
+        timezone = pytz.timezone("Asia/Kolkata")
 
         result = DB_MGR.run_query(DB_TABLE.get_limited_get_query(),[])
         for row in result:
