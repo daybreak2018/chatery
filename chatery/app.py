@@ -287,7 +287,7 @@ def main():
     parser.add_argument('--cert', default='./server.crt', type=str)
     parser.add_argument('--key', default='./server.key', type=str)
     parser.add_argument('--chain', default='./server.chain', type=str)
-    parser.add_argument('--tz', default='GMT', type=str)
+    parser.add_argument('--tz', default='Asia/Kolkata', type=str)
 
     args = parser.parse_args()
 
