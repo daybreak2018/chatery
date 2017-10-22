@@ -79,7 +79,6 @@ $(document).ready(function() {
           window.onbeforeunload = function(e) {
             $('#chat').val($('#chat').val() + 'Bye bye...\n');
               var message = 'Bye bye...\n'+username+' left the room';
-              ws.send(message);
             ws.close(1000, username+' left the room');
 
 
@@ -94,7 +93,7 @@ $(document).ready(function() {
               scrollSmoothToBottom("msgListContainer");
           };
           ws.onopen = function() {
-             ws.send(username+" entered the room");
+             var x="Bye Bye"
           };
           ws.onclose = function(evt) {
              var message = 'Connection closed by server: ' + evt.code + ' \"' + evt.reason + '\". Refresh to reconnect.\n';
