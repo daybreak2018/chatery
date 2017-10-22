@@ -1,6 +1,6 @@
 ## Chatery
 
-##### Simple Chat Application usable in Mobile & Desktop Browsers. [http://35.185.246.235/][http://35.185.246.235/]
+##### Simple Chat Application usable in Mobile & Desktop Browsers. http://35.185.246.235/
 
 ### Usage:
 
