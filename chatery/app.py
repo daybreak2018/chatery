@@ -25,7 +25,7 @@ DB_MGR = SQLiteDBManager(DB_TABLE)
 DP_MAP = {}
 TWITTER_ACCESS_TOKEN_MAP = {}
 
-TIMEZONE = "UTC+05:30"
+TIMEZONE = "Asia/Kolkata"
 
 class ChatPlugin(WebSocketPlugin):
     def __init__(self, bus):
