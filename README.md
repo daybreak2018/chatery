@@ -1,6 +1,6 @@
 ## Chatery
 
-##### Simple Chat Application usable in Mobile & Desktop Browsers.
+##### Simple Chat Application usable in Mobile & Desktop Browsers. [http://35.185.246.235/][http://35.185.246.235/]
 
 ### Usage:
 
@@ -50,7 +50,6 @@ Following flags are available
 - [--key KEY]
 - [--chain CHAIN]
 - [--tz TIMEZONE]
-
 
 #### Mini Docs
 - dbutils -> Package that manages all the database related operations & queries
